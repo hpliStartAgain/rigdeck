@@ -1,0 +1,27 @@
+[package]
+name = "rigdeck-desktop"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[build-dependencies]
+tauri-build = { version = "2.0", features = [] }
+
+[dependencies]
+tauri = { version = "2.0", features = [] }
+rigdeck-core = { workspace = true }
+rigdeck-store = { workspace = true }
+rigdeck-adapter-sdk = { workspace = true }
+rigdeck-adapters = { workspace = true }
+rigdeck-registry = { workspace = true }
+rigdeck-security = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+anyhow = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+tokio = { workspace = true }
+
+[features]
+custom-protocol = ["tauri/custom-protocol"]
