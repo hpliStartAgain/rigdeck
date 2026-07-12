@@ -1,0 +1,25 @@
+[package]
+name = "rigdeck-service"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+rigdeck-core = { workspace = true }
+rigdeck-store = { workspace = true }
+rigdeck-adapter-sdk = { workspace = true }
+rigdeck-adapters = { workspace = true }
+rigdeck-registry = { workspace = true }
+rigdeck-security = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+camino = { workspace = true }
+url = { workspace = true }
+getrandom = { workspace = true }
+tempfile = { workspace = true }
+base64 = { workspace = true }
+
+[dev-dependencies]
+tokio = { workspace = true }

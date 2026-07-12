@@ -1,7 +1,7 @@
 # Rust
 /target/
 **/*.rs.bk
-Cargo.lock
+# RigDeck 同时交付桌面应用和 CLI，Cargo.lock 必须入库以保证发布可复现。
 
 # Node / Frontend
 node_modules/
@@ -37,6 +37,9 @@ desktop.ini
 *.msi
 *.dmg
 *.app
+# CycloneDX 文件由 CI 针对每次发布重新生成并作为构建产物归档。
+*.cdx.json
+*.cdx.json.json
 
 # Test / coverage
 coverage/

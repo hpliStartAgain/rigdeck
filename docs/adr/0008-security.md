@@ -1,6 +1,6 @@
 # ADR-0008: Security Model
 
-- **Status**: Proposed
+- **Status**: Accepted
 - **Date**: 2026-07-11
 
 ## Context

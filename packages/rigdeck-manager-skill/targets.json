@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "skill": "rigdeck-manager",
+  "targets": [
+    { "adapter_id": "claude-code", "global": ".claude/skills/rigdeck-manager", "project": ".claude/skills/rigdeck-manager" },
+    { "adapter_id": "codex", "global": ".agents/skills/rigdeck-manager", "project": ".agents/skills/rigdeck-manager" },
+    { "adapter_id": "opencode", "global": ".config/opencode/skills/rigdeck-manager", "project": ".opencode/skills/rigdeck-manager" },
+    { "adapter_id": "hermes", "global": ".hermes/skills/rigdeck-manager", "project": ".agents/skills/rigdeck-manager" },
+    { "adapter_id": "antigravity", "global": ".gemini/config/skills/rigdeck-manager", "project": ".agents/skills/rigdeck-manager" },
+    { "adapter_id": "pi", "global": ".pi/agent/skills/rigdeck-manager", "project": ".pi/skills/rigdeck-manager" },
+    { "adapter_id": "devin", "global": null, "project": ".agents/skills/rigdeck-manager" }
+  ]
+}

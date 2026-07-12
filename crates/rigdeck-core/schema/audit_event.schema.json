@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rigdeck.local/schemas/audit_event.schema.json",
+  "title": "AuditEvent",
+  "description": "RigDeck 不可变审计事件。CLI --json 输出和 Tauri IPC 共用此格式。",
+  "type": "object",
+  "required": ["id", "event_type", "details", "created_at_ms"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "事件 ID",
+      "minLength": 1
+    },
+    "event_type": {
+      "type": "string",
+      "description": "事件种类，如 plan_applied、asset_pinned、conflict_resolved 等",
+      "minLength": 1
+    },
+    "plan_id": {
+      "type": ["string", "null"],
+      "description": "关联计划 ID"
+    },
+    "details": {
+      "type": "object",
+      "description": "不含 secret 的结构化详情",
+      "additionalProperties": true
+    },
+    "created_at_ms": {
+      "type": "integer",
+      "description": "Unix 毫秒时间戳"
+    }
+  }
+}

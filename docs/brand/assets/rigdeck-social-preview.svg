@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 640" role="img" aria-labelledby="title desc">
+  <title id="title">RigDeck GitHub 社交预览</title>
+  <desc id="desc">深蓝渐变背景上的 RigDeck 标志与中英文口号</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#0F2740"/><stop offset="1" stop-color="#1B4D7E"/></linearGradient>
+    <radialGradient id="glow"><stop stop-color="#2DD4BF" stop-opacity=".2"/><stop offset="1" stop-color="#2DD4BF" stop-opacity="0"/></radialGradient>
+  </defs>
+  <rect width="1280" height="640" rx="32" fill="url(#bg)"/>
+  <circle cx="1010" cy="130" r="360" fill="url(#glow)"/>
+  <g transform="translate(120 150) scale(5)">
+    <path d="M10 7h21c15 0 26 10 26 25S46 57 31 57H10z" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M22 21l19 11-19 11V21z" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+    <g fill="#2DD4BF" stroke="#FFFFFF" stroke-width="1.5"><circle cx="22" cy="21" r="4"/><circle cx="41" cy="32" r="4"/><circle cx="22" cy="43" r="4"/></g>
+  </g>
+  <text x="510" y="285" fill="#FFFFFF" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="96" font-weight="750" letter-spacing="-3">RigDeck</text>
+  <text x="515" y="355" fill="#DDFBF5" font-family="Noto Sans SC,Microsoft YaHei,Segoe UI,sans-serif" font-size="31">一处装配，让每个 Agent 各就其位。</text>
+  <text x="515" y="408" fill="#B9D5E8" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="25">One deck. Every agent, perfectly equipped.</text>
+  <g transform="translate(515 470)" fill="#2DD4BF"><circle r="7"/><circle cx="38" r="7"/><circle cx="76" r="7"/></g>
+</svg>

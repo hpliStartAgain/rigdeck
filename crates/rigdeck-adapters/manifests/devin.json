@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "adapter_id": "devin",
+  "version": "1.0.0",
+  "display_name": "Devin",
+  "protocol": { "min": 1, "max": 1 },
+  "platforms": ["windows", "macos", "linux"],
+  "detection": [
+    { "path": "{project}/.git", "markers": [], "profile": "repository", "version_hint": null },
+    { "path": "{project}/.agents", "markers": [], "profile": "repository", "version_hint": null }
+  ],
+  "capabilities": [
+    { "asset_kind": "skill", "scopes": ["project"], "operations": ["import", "install", "update", "toggle", "remove", "drift"] },
+    { "asset_kind": "prompt", "scopes": ["project"], "operations": ["import", "install", "update", "toggle", "remove", "drift"] },
+    { "asset_kind": "mcp_server", "scopes": ["project"], "operations": ["import"] }
+  ],
+  "scopes": [
+    { "id": "project", "display_name": "仓库", "project_required": true }
+  ],
+  "native_formats": [
+    { "id": "skill-directory", "preserves_comments": true, "preserves_unknown_fields": true },
+    { "id": "markdown", "preserves_comments": true, "preserves_unknown_fields": true },
+    { "id": "manual-export", "preserves_comments": true, "preserves_unknown_fields": true }
+  ],
+  "codecs": [
+    { "id": "agent-skill-v1", "asset_kind": "skill", "native_format": "skill-directory" },
+    { "id": "bounded-markdown-v1", "asset_kind": "prompt", "native_format": "markdown" },
+    { "id": "devin-manual-export-v1", "asset_kind": "mcp_server", "native_format": "manual-export" }
+  ],
+  "surfaces": [
+    { "id": "project-skills", "scope": "project", "asset_kind": "skill", "root": "{project}", "target": ".agents/skills/{name}", "native_format": "skill-directory", "section": null, "mode": "directory_tree", "writable": true, "precedence": 0 },
+    { "id": "project-skills-github", "scope": "project", "asset_kind": "skill", "root": "{project}", "target": ".github/skills/{name}", "native_format": "skill-directory", "section": null, "mode": "directory_tree", "writable": false, "precedence": 10 },
+    { "id": "project-skills-claude", "scope": "project", "asset_kind": "skill", "root": "{project}", "target": ".claude/skills/{name}", "native_format": "skill-directory", "section": null, "mode": "directory_tree", "writable": false, "precedence": 20 },
+    { "id": "project-skills-codex", "scope": "project", "asset_kind": "skill", "root": "{project}", "target": ".codex/skills/{name}", "native_format": "skill-directory", "section": null, "mode": "directory_tree", "writable": false, "precedence": 30 },
+    { "id": "project-instructions", "scope": "project", "asset_kind": "prompt", "root": "{project}", "target": "AGENTS.md", "native_format": "markdown", "section": null, "mode": "managed_block", "writable": true, "precedence": 0 },
+    { "id": "project-mcp-manual", "scope": "project", "asset_kind": "mcp_server", "root": "{project}", "target": ".rigdeck/exports/devin-mcp/{name}.json", "native_format": "manual-export", "section": null, "mode": "manual_required", "writable": false, "precedence": 0 }
+  ],
+  "limitations": [
+    { "code": "repository_only", "message": "Devin Skills 与 AGENTS.md 是仓库作用域；不存在官方本地全局 Skill 目录。", "recovery": "选择一个仓库 scope，或在 Devin 官方 UI 中手工配置组织级能力。" },
+    { "code": "cloud_write_manual", "message": "云端 Knowledge、Integration 与 MCP 没有等价的本地写入表面。", "recovery": "生成校验后的导出并按 manual_required 步骤使用官方 UI 或公开 API。" }
+  ],
+  "official_docs": ["https://docs.devin.ai/product-guides/skills", "https://docs.devin.ai/onboard-devin/agents-md", "https://docs.devin.ai/api-reference/overview"],
+  "helper": null
+}

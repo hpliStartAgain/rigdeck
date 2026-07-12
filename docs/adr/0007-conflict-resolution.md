@@ -1,56 +1,49 @@
-# ADR-0007: Conflict Resolution
+# ADR-0007：冲突解决
 
-- **Status**: Accepted
-- **Date**: 2026-07-11
+- **状态**：已接受
+- **日期**：2026-07-11
+- **实现复核**：2026-07-12
 
-## Context
+## 背景
 
-RigDeck must detect and resolve conflicts between RigDeck-managed state, agent-side changes, and source updates. The conflict taxonomy includes 10+ conflict types.
+RigDeck 必须识别 RigDeck 托管状态、Agent 侧变化和来源更新之间的冲突。强制覆盖会丢失用户内容，因此不能被包装成“冲突解决”。
 
-## Decision
+## 决策
 
-### Algorithm
+### 三方输入
 
-Use **diff3 three-way merge** as the standard algorithm:
-- **Base**: last deployment snapshot.
-- **Ours**: RigDeck's planned revision.
-- **Theirs**: agent-side current state.
+- **Base（基线）**：最近一次成功应用产生的 `DeploymentSnapshot`。
+- **Ours（RigDeck 侧）**：当前资产修订经目标 Adapter 重新渲染后的内容。
+- **Theirs（Agent 侧）**：刷新时发现、解决前再次校验 hash 的当前文件。
 
-### Automatic Resolution
+JSON 使用递归键级三方合并；普通 UTF-8 文本自动处理内容相同和单边修改，双边重叠修改必须由用户提交审查后的完整正文。合并正文立即进入加密对象库，冲突记录、计划、审计和日志只保留对象 hash，不保存正文。
 
-Automatically resolve:
-- Identical content (duplicates)
-- One-sided changes
-- Safe path normalization
-- Non-overlapping configuration keys
+### 八种动作
 
-### Manual Resolution
+1. **采用 RigDeck 修订**：重新渲染中央修订并生成覆盖计划。
+2. **导入 Agent 修订**：只对可无损反向映射的独占文件或 Skill 目录开放；暂存不可变修订，计划成功后才原子切换资产和分配修订。
+3. **保留单 Agent 分叉**：不改文件，只校验并采纳 Agent 当前 hash 为该分配的新基线。
+4. **重命名并共存**：恢复原名的 RigDeck 内容，以新名称写入 Agent 分叉，并在同一提交中创建新资产和分配。
+5. **三方合并**：自动合并无重叠变化；有重叠时要求人工正文。
+6. **逐文件选择**：每个受影响路径分别选择 RigDeck、Agent 或人工合并正文，且必须完整覆盖路径集合。
+7. **放弃计划**：把被替代的 pending 计划标记为 `abandoned`，清除本次解决尝试；磁盘冲突仍保持未解决。
+8. **从备份恢复**：先验证 manifest 和密文对象，再只读打开备份数据库，从历史快照为受影响路径生成恢复计划；不会直接替换当前数据库。
 
-Require user review for:
-- Overlapping content changes
-- Semantic differences
+共享 ManagedBlock 和 StructuredEntry 在没有保真反向 codec 时不会提供“导入 Agent 修订”或“重命名共存”，避免把块外或其他配置项误导入资产。
 
-### Resolution Options
+### 事务边界
 
-1. Keep RigDeck revision
-2. Import Agent revision
-3. Keep per-Agent fork
-4. Rename and coexist
-5. Three-way merge (diff3)
-6. Per-file selection
-7. Abandon plan
-8. Restore backup
+所有动作都遵循：
 
-### Hard Rule
+`生成计划 → 预览文件操作和目录效果 → 保存 pending 计划 → 文件备份/原子应用 → hash 验证 → SQLite 同事务提交快照、目录效果和审计`
 
-**Never** label force-overwrite as conflict resolution.
+目录效果使用 `CatalogEffect` 表达。任何目录 SQL 失败都会回滚 SQLite transaction，文件事务随后使用 rollback object 恢复原始字节。冲突只有在关联计划成功提交后才会标记为已解决；“放弃计划”例外，它会留下未解决冲突。
 
-### Persistence
+同一冲突重新选择动作时，旧 pending 解决计划会自动变为 `abandoned`，防止悬空计划以后被误应用。
 
-After resolution: persist decision, new baseline, and audit event.
+## 后果
 
-## Consequences
-
-- Every conflict contains cause, affected projections, risk, and at least one valid next action.
-- Resolving a conflict then refreshing produces a stable clean or intentionally divergent state.
-- diff3 implementation needs to handle text, JSON, YAML, TOML, and frontmatter formats.
+- 每个冲突都包含原因、受影响投影、风险和至少一个有效下一步。
+- 计划和审计不携带人工合并正文或明文密钥。
+- 解决后刷新会得到稳定 clean/显式分叉状态；放弃计划会继续显示冲突。
+- YAML、TOML 和 frontmatter 的键级自动合并仍依赖对应保真 codec；没有 codec 时按普通文本保守处理。

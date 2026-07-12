@@ -16,7 +16,7 @@ RigDeck needs a cross-platform desktop stack that is lightweight, local-first, a
 | Build tool | Vite | 5.x |
 | UI components | shadcn/ui + Tailwind CSS | Tailwind 3.4 |
 | State management | Zustand | 4.x |
-| Core / CLI | Rust | 2021 edition, MSRV 1.75 |
+| Core / CLI | Rust | 2021 edition, MSRV 1.88 |
 | SQLite | rusqlite + refinery | rusqlite 0.31, refinery 0.8 |
 | Content hash | Blake3 | 1.5 |
 | CLI framework | clap | 4.x (derive) |
@@ -40,3 +40,9 @@ RigDeck needs a cross-platform desktop stack that is lightweight, local-first, a
 - Rust core is shared between CLI and desktop — no logic duplication.
 - Frontend communicates with core exclusively through Tauri IPC.
 - All business logic lives in Rust crates; Tauri handlers are thin.
+
+## 2026-07-11 验证补充
+
+- 锁定依赖中的 Tauri 版本为 2.11.5，其声明 MSRV 为 1.77.2。
+- 完整 `Cargo.lock` 依赖图中最高声明 MSRV 为 1.88.0，因此项目 MSRV 设为 1.88，而不是骨架期未经验证的 1.75。
+- `Cargo.lock` 作为应用与 CLI 的发布输入提交到仓库。

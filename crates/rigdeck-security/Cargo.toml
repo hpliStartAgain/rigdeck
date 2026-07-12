@@ -14,3 +14,4 @@ anyhow = { workspace = true }
 camino = { workspace = true }
 tracing = { workspace = true }
 blake3 = { workspace = true }
+keyring = { workspace = true }

@@ -16,6 +16,7 @@ rigdeck-adapter-sdk = { workspace = true }
 rigdeck-adapters = { workspace = true }
 rigdeck-registry = { workspace = true }
 rigdeck-security = { workspace = true }
+rigdeck-service = { workspace = true }
 clap = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }

@@ -14,3 +14,10 @@ thiserror = { workspace = true }
 anyhow = { workspace = true }
 camino = { workspace = true }
 tracing = { workspace = true }
+toml_edit = { workspace = true }
+serde_yaml = { workspace = true }
+notify = { workspace = true }
+glob = { workspace = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }

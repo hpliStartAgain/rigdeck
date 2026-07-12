@@ -1,6 +1,6 @@
 # ADR-0003: Domain Model Design
 
-- **Status**: Proposed
+- **Status**: Accepted
 - **Date**: 2026-07-11
 
 ## Context

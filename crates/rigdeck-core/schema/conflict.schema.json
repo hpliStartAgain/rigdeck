@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rigdeck.local/schemas/conflict.schema.json",
+  "title": "Conflict",
+  "description": "RigDeck 刷新或冲突解决中产生的可解释冲突记录。",
+  "type": "object",
+  "required": ["id", "kind", "cause", "affected", "risk", "actions", "resolved"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "由冲突内容确定的稳定 ID",
+      "minLength": 1
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "duplicate_identical",
+        "name_collision",
+        "managed_modified",
+        "concurrent_modification",
+        "damaged_managed_block",
+        "prompt_block_moved",
+        "mcp_key_collision",
+        "missing_secret_binding",
+        "capability_loss",
+        "declared_name_mismatch",
+        "path_anomaly",
+        "case_only_rename",
+        "recreated_after_removal"
+      ]
+    },
+    "cause": {
+      "type": "string",
+      "description": "中文可读说明"
+    },
+    "affected": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "受影响的路径或资产 ID 列表"
+    },
+    "risk": {
+      "type": "string",
+      "description": "自动操作的风险说明"
+    },
+    "actions": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "keep_rigdeck_revision",
+          "import_agent_revision",
+          "keep_agent_fork",
+          "rename_and_coexist",
+          "restore_backup",
+          "manual_required"
+        ]
+      },
+      "description": "合法解决动作列表"
+    },
+    "resolved": {
+      "type": "boolean",
+      "description": "是否已解决"
+    },
+    "resolution_plan_id": {
+      "type": ["string", "null"],
+      "description": "解决计划 ID"
+    },
+    "resolved_at_ms": {
+      "type": ["integer", "null"],
+      "description": "解决时间戳"
+    }
+  }
+}

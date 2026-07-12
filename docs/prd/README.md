@@ -1,20 +1,83 @@
-# RigDeck — Product Requirements Document
+# RigDeck 产品需求文档 / Product Requirements Document
 
-> Status: Draft
-> Last updated: 2026-07-11
+- 状态：已确认，实施中
+- 版本：1.0
+- 更新日期：2026-07-11
+- 详细交付清单：[`TODO.md`](../../TODO.md)
 
-## Overview
+## 1. 产品定义
 
-RigDeck is a local-first desktop application for managing Agent Skills, prompts/rules, and MCP servers across multiple coding agents.
+RigDeck 是面向同时使用多个本地或仓库感知型编码 Agent 的开发者和高级用户的能力装配工具。产品由本地优先桌面应用、复用同一 Rust Core 的原生 CLI，以及 `rigdeck-manager` meta Skill 组成。
 
-## Target Audience
+**English summary:** RigDeck manages Agent Skills, prompts/rules, and MCP servers through one local-first lifecycle shared by a desktop app, native CLI, and meta-management Skill.
 
-Developers and power users who use multiple local or repository-aware coding agents (Claude Code, Codex, OpenCode, Hermes, Devin, Antigravity, Pi).
+## 2. 问题与目标
 
-## Core Capabilities
+现有 Agent 对 Skill、规则文件和 MCP 配置采用不同目录、格式、作用域和能力边界。用户手工复制文件时无法可靠回答“来源是什么、改过什么、能否卸载、Agent 是否又改了它、失败后如何恢复”。RigDeck 的目标是让这些变化可发现、可解释、可预览、可恢复。
 
-See `TODO.md` for the complete capability matrix and acceptance criteria.
+核心目标：
 
-## Acceptance Criteria
+1. 用一个领域模型管理三类资产，保留来源、不可变修订和审计结果。
+2. 通过运行时适配器支持 Claude Code、Codex、OpenCode、Hermes、Devin、Antigravity 和 Pi。
+3. 每次写操作都执行计划、预览、备份、应用、验证、审计和恢复闭环。
+4. 每次桌面启动检测外部变化，运行期间通过 watcher 持续更新。
+5. 在无登录、无网络、无云端后端时仍可管理已安装的本地资产。
 
-Every required product capability has a measurable acceptance criterion defined in the per-phase acceptance gates in `TODO.md`.
+## 3. 目标用户与关键任务
+
+| 用户 | 主要痛点 | 关键任务 |
+|---|---|---|
+| 多 Agent 开发者 | 同一能力要重复安装，格式差异容易破坏配置 | 搜索一次，预览兼容损失后分配到多个 Agent |
+| 团队工具维护者 | 无法证明资产来源、版本和回滚能力 | 导出不含 secret 的包与审计记录，复现安装计划 |
+| Agent/自动化流程 | 直接改配置风险高，缺少稳定机器接口 | 通过版本化 JSON CLI 查询，生成计划并等待人工确认 |
+
+## 4. 本地优先约束
+
+- 不要求账户、登录或持续联网。
+- SQLite 与内容寻址对象库位于本机；明文凭据仅进入系统钥匙串。
+- 远端目录不可用时，本地盘点、卸载、恢复、冲突处理必须继续工作。
+- 默认不启用遥测；若未来提供遥测，必须显式选择加入并公开字段。
+- 旧 `agent-skill-registry` 仅作为一次性迁移输入，不是运行时依赖或事实源。
+
+## 5. 功能范围与可测验收
+
+| 能力 | 验收标准 |
+|---|---|
+| 统一资产 | `skill`、`prompt`、`mcp_server` 通过同一 API 完成修订、分配、计划、卸载与恢复；身份不以目录名代替来源 |
+| Adapter SDK | 安装 mock adapter 包后无需修改 Core 即可检测实例；不兼容协议、越界路径与未信任 helper 均失败关闭 |
+| 事务引擎 | 每个写步骤注入失败后，文件与数据库恢复到逐字节相同的应用前状态；重复应用生成空计划 |
+| 七个适配器 | Windows/macOS 黄金夹具全部通过；每个能力矩阵单元都有支持证据或可见的 `unsupported/manual_required` 原因 |
+| 生命周期 | 支持发现、检查、审计、安装、更新、固定、分叉、启停、归档、卸载、备份、恢复、导入导出 |
+| 刷新与冲突 | 启动和 watcher 能检测增改删重命名；解决冲突后再次刷新得到稳定的 clean 或明确的 intentionally-divergent 状态 |
+| 桌面体验 | 七个主导航可键盘操作；中英截图无截断；所有写操作显示目标路径、diff、风险与回滚可用性 |
+| CLI | 人类输出与版本化 JSON 同源；非交互写入缺少 `--yes --plan <id>` 时失败关闭；与桌面产生字节等价计划 |
+| 安全 | traversal、绝对路径、symlink escape、archive bomb、未信任 helper、安全扫描夹具均被阻止；secret 扫描无泄漏 |
+| 性能 | 参考 Windows 机器上 1,000 个 Skill 冷扫描 P95 < 3 秒；watcher 通常 < 2 秒；10,000 资产下 UI 不冻结 |
+| 发布 | Windows/macOS 安装、升级、回滚、修复、卸载矩阵通过；签名与更新清单验证通过；核心关键模块覆盖率 ≥ 85% |
+
+## 6. 关键用户流程
+
+1. **首次使用**：启动 → 检测 Agent → 扫描原生状态 → 展示导入候选 → 用户选择接管或保留外部管理。
+2. **安全分配**：搜索/导入 → 检查来源与审计 → 选择 Agent/作用域 → 预览文件计划与兼容损失 → 确认应用 → 刷新验证。
+3. **外部漂移**：watcher/启动扫描 → 与基线比较 → 自动解决单边变化或创建冲突 → 用户选择合法动作 → 更新基线与审计。
+4. **恢复**：从 Activity/CLI 选择部署快照 → 生成恢复计划 → 确认 → 原子恢复 → doctor 检查。
+
+## 7. 明确非目标
+
+- v1 不提供 SaaS 账户系统或强制云后端。
+- 不执行不受信任 Skill 中的脚本来完成检查。
+- 不使用浏览器自动化或私有 API 冒充 Devin 等云端能力可管理。
+- 不静默覆盖用户文件或未解决冲突。
+- Linux 保持架构可移植，但不是 Windows/macOS GA 阻塞项。
+
+## 8. 成功指标
+
+- 新用户仅凭文档在 10 分钟内完成首次 Agent 检测和一次安全 Skill 分配。
+- 事务/适配器契约测试 100% 通过，核心关键模块覆盖率至少 85%。
+- P0/P1 缺陷清零，关键/高危依赖漏洞无未批准例外。
+- GUI、CLI、meta Skill 对资产、状态、风险和冲突使用同一术语。
+
+## 9. 外部门禁
+
+商标检索、域名预留、Windows 代码签名证书、Apple Developer Program 与 notarization 由发布负责人完成。开发构建可以未签名，但不得因此标记为 GA。
+

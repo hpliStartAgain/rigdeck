@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "adapter_id": "pi",
+  "version": "1.0.0",
+  "display_name": "Pi Coding Agent",
+  "protocol": { "min": 1, "max": 1 },
+  "platforms": ["windows", "macos", "linux"],
+  "detection": [
+    { "path": "{home}/.pi/agent", "markers": [], "profile": null, "version_hint": "pi --version" },
+    { "path": "{project}/.pi", "markers": [], "profile": "project", "version_hint": null }
+  ],
+  "capabilities": [
+    { "asset_kind": "skill", "scopes": ["global", "project"], "operations": ["import", "install", "update", "toggle", "remove", "drift"] },
+    { "asset_kind": "prompt", "scopes": ["global", "project"], "operations": ["import", "install", "update", "toggle", "remove", "drift"] },
+    { "asset_kind": "mcp_server", "scopes": ["global", "project"], "operations": ["import", "install", "update", "toggle", "remove", "drift"] }
+  ],
+  "scopes": [
+    { "id": "global", "display_name": "全局", "project_required": false },
+    { "id": "project", "display_name": "项目", "project_required": true }
+  ],
+  "native_formats": [
+    { "id": "skill-directory", "preserves_comments": true, "preserves_unknown_fields": true },
+    { "id": "markdown", "preserves_comments": true, "preserves_unknown_fields": true },
+    { "id": "pi-extension", "preserves_comments": true, "preserves_unknown_fields": true }
+  ],
+  "codecs": [
+    { "id": "agent-skill-v1", "asset_kind": "skill", "native_format": "skill-directory" },
+    { "id": "bounded-markdown-v1", "asset_kind": "prompt", "native_format": "markdown" },
+    { "id": "pi-mcp-extension-v1", "asset_kind": "mcp_server", "native_format": "pi-extension" }
+  ],
+  "surfaces": [
+    { "id": "global-skills", "scope": "global", "asset_kind": "skill", "root": "{home}", "target": ".pi/agent/skills/{name}", "native_format": "skill-directory", "section": null, "mode": "directory_tree", "writable": true, "precedence": 0 },
+    { "id": "global-skills-standard", "scope": "global", "asset_kind": "skill", "root": "{home}", "target": ".agents/skills/{name}", "native_format": "skill-directory", "section": null, "mode": "directory_tree", "writable": false, "precedence": 10 },
+    { "id": "project-skills", "scope": "project", "asset_kind": "skill", "root": "{project}", "target": ".pi/skills/{name}", "native_format": "skill-directory", "section": null, "mode": "directory_tree", "writable": true, "precedence": 0 },
+    { "id": "project-skills-standard", "scope": "project", "asset_kind": "skill", "root": "{project}", "target": ".agents/skills/{name}", "native_format": "skill-directory", "section": null, "mode": "directory_tree", "writable": false, "precedence": 10 },
+    { "id": "global-context", "scope": "global", "asset_kind": "prompt", "root": "{home}", "target": ".pi/agent/AGENTS.md", "native_format": "markdown", "section": null, "mode": "managed_block", "writable": true, "precedence": 0 },
+    { "id": "project-prompt", "scope": "project", "asset_kind": "prompt", "root": "{project}", "target": ".pi/prompts/{name}.md", "native_format": "markdown", "section": null, "mode": "replace_file", "writable": true, "precedence": 0 },
+    { "id": "global-mcp-extension", "scope": "global", "asset_kind": "mcp_server", "root": "{home}", "target": ".pi/agent/extensions/rigdeck-mcp.ts", "native_format": "pi-extension", "section": null, "mode": "manual_required", "writable": false, "precedence": 0 },
+    { "id": "project-mcp-extension", "scope": "project", "asset_kind": "mcp_server", "root": "{project}", "target": ".pi/extensions/rigdeck-mcp.ts", "native_format": "pi-extension", "section": null, "mode": "manual_required", "writable": false, "precedence": 0 }
+  ],
+  "limitations": [
+    { "code": "mcp_extension_approval", "message": "Pi 没有等价的稳定内置 MCP 配置，需安装可选 RigDeck companion extension。", "recovery": "审查扩展 hash、权限和源码后，在独立高风险计划中确认安装与启用。" }
+  ],
+  "official_docs": ["https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/README.md", "https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/docs/settings.md", "https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/docs/extensions.md"],
+  "helper": null
+}

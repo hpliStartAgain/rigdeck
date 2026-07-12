@@ -1,0 +1,197 @@
+name: 持续集成
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    # 即使没有代码提交，也要每周重新拉取安全公告数据库进行审计。
+    - cron: "23 3 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  rust:
+    name: Rust / ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+      - name: 安装 Rust 1.88
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: 1.88.0
+          components: rustfmt, clippy
+      - name: 校验格式
+        run: cargo fmt --all -- --check
+      - name: 运行 Clippy
+        run: cargo clippy --workspace --all-targets --locked -- -D warnings
+      - name: 运行 Rust 测试
+        run: cargo test --workspace --locked
+
+  frontend:
+    name: 前端 / Windows
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: apps/desktop
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+      - name: 安装 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.19.0
+          cache: npm
+          cache-dependency-path: apps/desktop/package-lock.json
+      - name: 安装锁定依赖
+        run: npm ci
+      - name: 类型检查与构建
+        run: npm run check
+
+  pi-extension:
+    name: Pi MCP Extension
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/rigdeck-pi-mcp-extension
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+      - name: 安装 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.19.0
+          cache: npm
+          cache-dependency-path: packages/rigdeck-pi-mcp-extension/package-lock.json
+      - name: 安装锁定依赖
+        run: npm ci
+      - name: 类型与安全测试
+        run: npm run typecheck && npm test
+
+  supply-chain:
+    name: 供应链审计与 SBOM
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+      - name: 安装 Rust 1.88
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: 1.88.0
+      - name: 安装固定版本的供应链工具
+        run: |
+          cargo install cargo-audit --version 0.22.2 --locked
+          cargo install cargo-cyclonedx --version 0.5.9 --locked
+      - name: 审计 Rust 锁定依赖
+        run: cargo audit
+      - name: 生成桌面端和 CLI 的 Rust CycloneDX SBOM
+        run: |
+          cargo cyclonedx --manifest-path crates/rigdeck-cli/Cargo.toml --format json --all --override-filename rigdeck-cli.cdx
+          cargo cyclonedx --manifest-path apps/desktop/src-tauri/Cargo.toml --format json --all --override-filename rigdeck-desktop.cdx
+      - name: 安装 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.19.0
+          cache: npm
+          cache-dependency-path: |
+            apps/desktop/package-lock.json
+            packages/rigdeck-pi-mcp-extension/package-lock.json
+      - name: 安装并审计桌面前端依赖
+        working-directory: apps/desktop
+        run: |
+          npm ci --registry=https://registry.npmjs.org
+          npm audit --audit-level=high --registry=https://registry.npmjs.org
+      - name: 安装并审计 Pi 扩展依赖
+        working-directory: packages/rigdeck-pi-mcp-extension
+        run: |
+          npm ci --registry=https://registry.npmjs.org
+          npm audit --audit-level=high --registry=https://registry.npmjs.org
+      - name: 生成 JavaScript CycloneDX SBOM
+        run: |
+          mkdir -p artifacts
+          npm sbom --prefix apps/desktop --sbom-format=cyclonedx --sbom-type=application > artifacts/desktop-frontend.cdx.json
+          npm sbom --prefix packages/rigdeck-pi-mcp-extension --sbom-format=cyclonedx --sbom-type=application > artifacts/pi-extension.cdx.json
+      - name: 归档发布 SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: rigdeck-cyclonedx-sbom
+          if-no-files-found: error
+          retention-days: 90
+          path: |
+            crates/rigdeck-cli/rigdeck-cli.cdx.json
+            apps/desktop/src-tauri/rigdeck-desktop.cdx.json
+            artifacts/desktop-frontend.cdx.json
+            artifacts/pi-extension.cdx.json
+
+  performance:
+    name: 有界性能回归
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+      - name: 安装 Rust 1.88
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: 1.88.0
+      - name: 10k 资产分页 P95
+        run: cargo test -p rigdeck-store ten_thousand_assets_are_counted_and_paged_inside_sqlite --locked -- --nocapture
+      - name: 1k Skill 冷扫描 P95
+        run: cargo test -p rigdeck-adapters cold_scan_of_one_thousand_typical_skills_meets_budget --locked -- --nocapture
+
+  build-release:
+    name: 发布构建 / ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            label: macOS-arm64
+          - os: macos-latest
+            target: x86_64-apple-darwin
+            label: macOS-x64
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+      - name: 安装 Rust 1.88
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: 1.88.0
+          targets: ${{ matrix.target }}
+      - name: 安装 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.19.0
+          cache: npm
+          cache-dependency-path: apps/desktop/package-lock.json
+      - name: 安装桌面前端依赖
+        working-directory: apps/desktop
+        run: npm ci
+      - name: 构建桌面端 (Tauri)
+        working-directory: apps/desktop
+        run: npx tauri build --target ${{ matrix.target }}
+        continue-on-error: true
+      - name: 构建 CLI
+        run: cargo build --release -p rigdeck-cli --target ${{ matrix.target }} --locked
+      - name: 上传 CLI 产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: rigdeck-cli-${{ matrix.label }}
+          path: target/${{ matrix.target }}/release/rigdeck
+          if-no-files-found: error
+      - name: 上传桌面端产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: rigdeck-desktop-${{ matrix.label }}
+          path: |
+            target/${{ matrix.target }}/release/bundle/
+            target/${{ matrix.target }}/release/rigdeck-desktop
+          if-no-files-found: warn

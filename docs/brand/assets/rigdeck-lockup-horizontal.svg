@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 80" role="img" aria-labelledby="title desc">
+  <title id="title">RigDeck 横向组合标志</title>
+  <desc id="desc">RigDeck 标志、产品名与中文口号</desc>
+  <g transform="translate(8 8)">
+    <path d="M10 7h21c15 0 26 10 26 25S46 57 31 57H10z" fill="none" stroke="#1B4D7E" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M22 21l19 11-19 11V21z" fill="none" stroke="#1B4D7E" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <g fill="#2DD4BF" stroke="#1B4D7E" stroke-width="2.5"><circle cx="22" cy="21" r="5"/><circle cx="41" cy="32" r="5"/><circle cx="22" cy="43" r="5"/></g>
+  </g>
+  <text x="88" y="39" fill="#0F172A" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="34" font-weight="700" letter-spacing="-1">RigDeck</text>
+  <text x="90" y="62" fill="#475569" font-family="Noto Sans SC,Microsoft YaHei,Segoe UI,sans-serif" font-size="14">一处装配，让每个 Agent 各就其位。</text>
+</svg>

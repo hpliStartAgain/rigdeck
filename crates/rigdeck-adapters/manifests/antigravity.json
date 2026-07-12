@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "adapter_id": "antigravity",
+  "version": "1.0.0",
+  "display_name": "Google Antigravity",
+  "protocol": { "min": 1, "max": 1 },
+  "platforms": ["windows", "macos", "linux"],
+  "detection": [
+    { "path": "{home}/.gemini", "markers": [], "profile": null, "version_hint": "agy --version" },
+    { "path": "{project}/.agents", "markers": [], "profile": "project", "version_hint": null }
+  ],
+  "capabilities": [
+    { "asset_kind": "skill", "scopes": ["global", "project", "plugin"], "operations": ["import", "install", "update", "toggle", "remove", "drift"] },
+    { "asset_kind": "prompt", "scopes": ["global", "project", "plugin"], "operations": ["import", "install", "update", "toggle", "remove", "drift"] },
+    { "asset_kind": "mcp_server", "scopes": ["global", "project", "plugin"], "operations": ["import", "install", "update", "toggle", "remove", "drift"] }
+  ],
+  "scopes": [
+    { "id": "global", "display_name": "全局", "project_required": false },
+    { "id": "project", "display_name": "工作区", "project_required": true },
+    { "id": "plugin", "display_name": "工作区插件", "project_required": true }
+  ],
+  "native_formats": [
+    { "id": "skill-directory", "preserves_comments": true, "preserves_unknown_fields": true },
+    { "id": "plugin-directory", "preserves_comments": true, "preserves_unknown_fields": true },
+    { "id": "markdown", "preserves_comments": true, "preserves_unknown_fields": true },
+    { "id": "json", "preserves_comments": false, "preserves_unknown_fields": true }
+  ],
+  "codecs": [
+    { "id": "agent-skill-v1", "asset_kind": "skill", "native_format": "skill-directory" },
+    { "id": "antigravity-plugin-v1", "asset_kind": "skill", "native_format": "plugin-directory" },
+    { "id": "antigravity-rule-v1", "asset_kind": "prompt", "native_format": "markdown" },
+    { "id": "antigravity-mcp-v1", "asset_kind": "mcp_server", "native_format": "json" }
+  ],
+  "surfaces": [
+    { "id": "global-skills", "scope": "global", "asset_kind": "skill", "root": "{home}", "target": ".gemini/config/skills/{name}", "native_format": "skill-directory", "section": null, "mode": "directory_tree", "writable": true, "precedence": 0 },
+    { "id": "workspace-skills", "scope": "project", "asset_kind": "skill", "root": "{project}", "target": ".agents/skills/{name}", "native_format": "skill-directory", "section": null, "mode": "directory_tree", "writable": true, "precedence": 0 },
+    { "id": "workspace-skills-legacy", "scope": "project", "asset_kind": "skill", "root": "{project}", "target": ".agent/skills/{name}", "native_format": "skill-directory", "section": null, "mode": "directory_tree", "writable": false, "precedence": 100 },
+    { "id": "workspace-plugins", "scope": "plugin", "asset_kind": "skill", "root": "{project}", "target": ".agents/plugins/{name}", "native_format": "plugin-directory", "section": null, "mode": "directory_tree", "writable": true, "precedence": 0 },
+    { "id": "global-rules", "scope": "global", "asset_kind": "prompt", "root": "{home}", "target": ".gemini/GEMINI.md", "native_format": "markdown", "section": null, "mode": "managed_block", "writable": true, "precedence": 0 },
+    { "id": "workspace-rules", "scope": "project", "asset_kind": "prompt", "root": "{project}", "target": ".agents/rules/{name}.md", "native_format": "markdown", "section": null, "mode": "replace_file", "writable": true, "precedence": 0 },
+    { "id": "plugin-rules", "scope": "plugin", "asset_kind": "prompt", "root": "{project}", "target": ".agents/plugins/{name}/rules/rigdeck.md", "native_format": "markdown", "section": null, "mode": "managed_block", "writable": true, "precedence": 0 },
+    { "id": "global-mcp", "scope": "global", "asset_kind": "mcp_server", "root": "{home}", "target": ".gemini/antigravity-cli/mcp_config.json", "native_format": "json", "section": "mcpServers", "mode": "structured_entry", "writable": true, "precedence": 0 },
+    { "id": "workspace-mcp", "scope": "project", "asset_kind": "mcp_server", "root": "{project}", "target": ".agents/mcp_config.json", "native_format": "json", "section": "mcpServers", "mode": "structured_entry", "writable": true, "precedence": 0 },
+    { "id": "plugin-mcp", "scope": "plugin", "asset_kind": "mcp_server", "root": "{project}", "target": ".agents/plugins/{name}/mcp_config.json", "native_format": "json", "section": "mcpServers", "mode": "structured_entry", "writable": true, "precedence": 0 }
+  ],
+  "limitations": [
+    { "code": "hooks_require_confirmation", "message": "Plugin hooks 是可执行行为，导入时不会自动启用。", "recovery": "在计划中单独检查 hooks.json 并完成高风险确认。" }
+  ],
+  "official_docs": ["https://antigravity.google/docs/skills", "https://antigravity.google/docs/ide-rules", "https://antigravity.google/docs/plugins", "https://antigravity.google/docs/mcp"],
+  "helper": null
+}

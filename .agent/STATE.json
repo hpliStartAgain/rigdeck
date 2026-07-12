@@ -1,0 +1,44 @@
+{
+  "task_id": "complete-rigdeck-ga",
+  "tier": "COMPLEX",
+  "current_phase": "M2/M3/M4 并行收口 — P0/P1 功能与测试已完成",
+  "next_action": "推进 P2 文档（quickstart/用户指南/教程），或继续 Phase 3 七个 Adapter 的完整能力矩阵实现",
+  "blockers": [
+    "本机未安装 Microsoft C++ Build Tools，Windows 原生链接暂由 CI 验证",
+    "Windows 代码签名证书尚未购买",
+    "Apple Developer Program 尚未开通"
+  ],
+  "do_not": [
+    "不要在 Core 中按 Agent 名称分支",
+    "不要让适配器或前端直接写 Agent 文件",
+    "不要在任何持久化或输出中记录明文 secret",
+    "不要把未签名、未完成跨平台安装测试的版本标记为 GA"
+  ],
+  "last_commit": "fe8175a",
+  "branch": "codex/complete-rigdeck-ga",
+  "open_files": [
+    "TODO.md",
+    ".agent/STATE.json",
+    "CHANGELOG.md"
+  ],
+  "verified_passing": [
+    "Rust 1.97.0 / Cargo 1.97.0 / rustfmt / Clippy 工具链可用",
+    "前端 npm install 成功",
+    "cargo fmt --all -- --check",
+    "apps/desktop npm run build",
+    "品牌 16px/1024px/social preview 视觉检查与对比度检查",
+    "rigdeck-core 22 项测试（含 property-based + schema 合法性）",
+    "rigdeck-adapter-sdk 5 项测试",
+    "rigdeck-adapters 31 项测试（含真实 watcher + prompt block 漂移）",
+    "rigdeck-store 16 项单元/事务测试",
+    "rigdeck-registry 21 项测试（含故障注入 + 路径逃逸）",
+    "rigdeck-security 8 项测试（含 redact 混沌）",
+    "rigdeck-service 20 项测试（含取消 + 等价性 + 生命周期）",
+    "rigdeck-cli 10 项测试",
+    "JSONC/TOML/YAML 注释和未知字段保真测试",
+    "SQLite v2 刷新库存与冲突解决事务测试",
+    "全 workspace 8 crate 共 136 项测试通过"
+  ],
+  "todo_md": "TODO.md",
+  "notion_page_id": "39a2ced8-bde0-8186-87e5-d07abe0527e0"
+}

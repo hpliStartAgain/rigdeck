@@ -1,0 +1,169 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rigdeck.local/schemas/plan.schema.json",
+  "title": "DeploymentPlan",
+  "description": "RigDeck 可序列化、可审计的部署计划。CLI --json 输出和 Tauri IPC 共用此格式。",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "id",
+    "source_hashes",
+    "operations",
+    "risk",
+    "created_at_ms"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "integer",
+      "description": "公共协议版本",
+      "minimum": 1
+    },
+    "id": {
+      "type": "string",
+      "description": "由计划语义内容确定的 ID",
+      "minLength": 1
+    },
+    "assignment_id": {
+      "type": ["string", "null"],
+      "description": "可选分配 ID"
+    },
+    "purpose": {
+      "type": "string",
+      "enum": ["install", "update", "remove", "restore", "conflict_resolution"],
+      "default": "install"
+    },
+    "source_hashes": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "输入资产/修订 hash；应用前必须仍可用"
+    },
+    "operations": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/PlannedOperation"}
+    },
+    "catalog_effects": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/CatalogEffect"},
+      "default": []
+    },
+    "risk": {
+      "type": "string",
+      "enum": ["low", "medium", "high", "critical"]
+    },
+    "created_at_ms": {
+      "type": "integer",
+      "description": "Unix 毫秒时间戳"
+    }
+  },
+  "$defs": {
+    "PlannedOperation": {
+      "type": "object",
+      "required": [
+        "id",
+        "kind",
+        "target_path",
+        "rendered_diff",
+        "risk"
+      ],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "kind": {
+          "type": "string",
+          "enum": ["write_file", "remove_file", "adopt_baseline"]
+        },
+        "target_path": {"type": "string", "minLength": 1},
+        "expected_target_hash": {"type": ["string", "null"]},
+        "desired_object": {"type": ["string", "null"]},
+        "desired_hash": {"type": ["string", "null"]},
+        "rollback_object": {"type": ["string", "null"]},
+        "rendered_diff": {"type": "string"},
+        "compatibility_losses": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/CompatibilityLoss"}
+        },
+        "risk": {
+          "type": "string",
+          "enum": ["low", "medium", "high", "critical"]
+        }
+      }
+    },
+    "CompatibilityLoss": {
+      "type": "object",
+      "required": ["kind", "message"],
+      "properties": {
+        "kind": {"type": "string"},
+        "message": {"type": "string"}
+      }
+    },
+    "CatalogEffect": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {"const": "set_asset_revision"},
+            "asset_id": {"type": "string"},
+            "revision_id": {"type": "string"}
+          },
+          "required": ["kind", "asset_id", "revision_id"]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {"const": "set_assignment_revision"},
+            "assignment_id": {"type": "string"},
+            "revision_id": {"type": "string"}
+          },
+          "required": ["kind", "assignment_id", "revision_id"]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {"const": "upsert_asset"},
+            "asset": {"$ref": "#/$defs/Asset"}
+          },
+          "required": ["kind", "asset"]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {"const": "upsert_assignment"},
+            "assignment": {"$ref": "#/$defs/Assignment"}
+          },
+          "required": ["kind", "assignment"]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {"const": "abandon_plan"},
+            "plan_id": {"type": "string"}
+          },
+          "required": ["kind", "plan_id"]
+        }
+      ]
+    },
+    "Asset": {
+      "type": "object",
+      "required": ["id", "identity", "kind", "display_name", "state", "tags"],
+      "properties": {
+        "id": {"type": "string"},
+        "kind": {"type": "string", "enum": ["skill", "prompt", "mcp_server"]},
+        "display_name": {"type": "string"},
+        "current_revision_id": {"type": ["string", "null"]},
+        "state": {"type": "string", "enum": ["active", "pinned", "disabled", "archived"]},
+        "tags": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "Assignment": {
+      "type": "object",
+      "required": ["id", "asset_id", "revision_id", "agent_instance_id", "scope", "enabled"],
+      "properties": {
+        "id": {"type": "string"},
+        "asset_id": {"type": "string"},
+        "revision_id": {"type": "string"},
+        "agent_instance_id": {"type": "string"},
+        "scope": {"type": "string"},
+        "enabled": {"type": "boolean"}
+      }
+    }
+  }
+}

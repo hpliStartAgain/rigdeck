@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "platform": "windows",
+  "reference_home": "C:/Users/RigDeckFixture",
+  "reference_project": "C:/work/rigdeck-fixture",
+  "line_ending": "crlf",
+  "adapters": [
+    {
+      "adapter_id": "claude-code",
+      "home_marker": ".claude",
+      "project_marker": ".claude",
+      "profiles": [
+        { "profile": null, "scope": "global", "skill_target": ".claude/skills/golden-skill/SKILL.md", "prompt_target": ".claude/CLAUDE.md", "mcp_target": ".claude.json", "mcp_mode": "structured_entry" },
+        { "profile": "project", "scope": "project", "skill_target": ".claude/skills/golden-skill/SKILL.md", "prompt_target": "CLAUDE.md", "mcp_target": ".mcp.json", "mcp_mode": "structured_entry" }
+      ]
+    },
+    {
+      "adapter_id": "codex",
+      "home_marker": ".codex",
+      "project_marker": ".agents",
+      "profiles": [
+        { "profile": null, "scope": "global", "skill_target": ".agents/skills/golden-skill/SKILL.md", "prompt_target": ".codex/AGENTS.md", "mcp_target": ".codex/config.toml", "mcp_mode": "structured_entry" },
+        { "profile": "project", "scope": "project", "skill_target": ".agents/skills/golden-skill/SKILL.md", "prompt_target": "AGENTS.md", "mcp_target": null, "mcp_mode": "unsupported" }
+      ]
+    },
+    {
+      "adapter_id": "opencode",
+      "home_marker": ".config/opencode",
+      "project_marker": ".opencode",
+      "profiles": [
+        { "profile": null, "scope": "global", "skill_target": ".config/opencode/skills/golden-skill/SKILL.md", "prompt_target": ".config/opencode/AGENTS.md", "mcp_target": ".config/opencode/opencode.jsonc", "mcp_mode": "structured_entry" },
+        { "profile": "project", "scope": "project", "skill_target": ".opencode/skills/golden-skill/SKILL.md", "prompt_target": "AGENTS.md", "mcp_target": "opencode.jsonc", "mcp_mode": "structured_entry" }
+      ]
+    },
+    {
+      "adapter_id": "hermes",
+      "home_marker": ".hermes",
+      "project_marker": ".hermes",
+      "profiles": [
+        { "profile": null, "scope": "global", "skill_target": ".hermes/skills/golden-skill/SKILL.md", "prompt_target": ".hermes/SOUL.md", "mcp_target": ".hermes/config.yaml", "mcp_mode": "structured_entry" },
+        { "profile": "project", "scope": "project", "skill_target": ".agents/skills/golden-skill/SKILL.md", "prompt_target": ".hermes.md", "mcp_target": null, "mcp_mode": "unsupported" }
+      ]
+    },
+    {
+      "adapter_id": "antigravity",
+      "home_marker": ".gemini",
+      "project_marker": ".agents",
+      "profiles": [
+        { "profile": null, "scope": "global", "skill_target": ".gemini/config/skills/golden-skill/SKILL.md", "prompt_target": ".gemini/GEMINI.md", "mcp_target": ".gemini/antigravity-cli/mcp_config.json", "mcp_mode": "structured_entry" },
+        { "profile": "project", "scope": "project", "skill_target": ".agents/skills/golden-skill/SKILL.md", "prompt_target": ".agents/rules/review-rules.md", "mcp_target": ".agents/mcp_config.json", "mcp_mode": "structured_entry" }
+      ]
+    },
+    {
+      "adapter_id": "pi",
+      "home_marker": ".pi/agent",
+      "project_marker": ".pi",
+      "profiles": [
+        { "profile": null, "scope": "global", "skill_target": ".pi/agent/skills/golden-skill/SKILL.md", "prompt_target": ".pi/agent/AGENTS.md", "mcp_target": ".pi/agent/extensions/rigdeck-mcp.ts", "mcp_mode": "manual_required" },
+        { "profile": "project", "scope": "project", "skill_target": ".pi/skills/golden-skill/SKILL.md", "prompt_target": ".pi/prompts/review-rules.md", "mcp_target": ".pi/extensions/rigdeck-mcp.ts", "mcp_mode": "manual_required" }
+      ]
+    },
+    {
+      "adapter_id": "devin",
+      "home_marker": null,
+      "project_marker": ".git",
+      "profiles": [
+        { "profile": "repository", "scope": "project", "skill_target": ".agents/skills/golden-skill/SKILL.md", "prompt_target": "AGENTS.md", "mcp_target": ".rigdeck/exports/devin-mcp/golden-mcp.json", "mcp_mode": "manual_required" }
+      ]
+    }
+  ]
+}
