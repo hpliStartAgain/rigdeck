@@ -948,7 +948,7 @@ impl Database {
     /// 追加一条不含 secret 的审计事件。
     pub fn save_audit_event(&self, event: &AuditEvent) -> StoreResult<()> {
         self.connection.execute(
-            "INSERT INTO audit_events(id, event_type, plan_id, json, created_at_ms) VALUES(?1, ?2, ?3, ?4, ?5)",
+            "INSERT OR IGNORE INTO audit_events(id, event_type, plan_id, json, created_at_ms) VALUES(?1, ?2, ?3, ?4, ?5)",
             params![
                 event.id,
                 event.event_type,
