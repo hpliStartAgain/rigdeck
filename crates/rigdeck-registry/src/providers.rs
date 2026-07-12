@@ -284,8 +284,7 @@ impl CatalogProvider for UrlProvider<'_> {
 
     async fn search(&self, _query: &str, _limit: usize) -> RegistryResult<SearchResult> {
         Err(RegistryError::InvalidSource(
-            "URL provider 只按明确 URL 获取；目录搜索请使用 skills.sh 或配置的私有源"
-                .to_owned(),
+            "URL provider 只按明确 URL 获取；目录搜索请使用 skills.sh 或配置的私有源".to_owned(),
         ))
     }
 
@@ -334,9 +333,7 @@ impl CatalogProvider for UrlProvider<'_> {
             .iter()
             .any(|file| file.relative_path == Utf8Path::new("SKILL.md"))
         {
-            return Err(RegistryError::NotFound(
-                "URL 内容缺少 SKILL.md".to_owned(),
-            ));
+            return Err(RegistryError::NotFound("URL 内容缺少 SKILL.md".to_owned()));
         }
         let package = url
             .path_segments()

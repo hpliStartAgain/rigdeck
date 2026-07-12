@@ -1140,7 +1140,10 @@ impl RigDeckService {
     /// 扫描 `skills/` 下的两级目录（category/name），对每个含 SKILL.md 的目录
     /// 调用 `add_local_skill`。manifests 不读取——旧 Registry 的安装视图只作为
     /// 候选，不直接标记为已托管。导入后用户自行 assign。
-    pub fn import_legacy_registry(&self, registry_root: &Utf8Path) -> ServiceResult<LegacyImportReport> {
+    pub fn import_legacy_registry(
+        &self,
+        registry_root: &Utf8Path,
+    ) -> ServiceResult<LegacyImportReport> {
         let skills_dir = registry_root.join("skills");
         if !skills_dir.is_dir() {
             return Err(ServiceError::InvalidInput(format!(
@@ -1153,9 +1156,11 @@ impl RigDeckService {
         for category_entry in fs::read_dir(&skills_dir)
             .map_err(|error| ServiceError::InvalidInput(error.to_string()))?
         {
-            let category_path = Utf8PathBuf::from_path_buf(category_entry
-                .map_err(|error| ServiceError::InvalidInput(error.to_string()))?
-                .path())
+            let category_path = Utf8PathBuf::from_path_buf(
+                category_entry
+                    .map_err(|error| ServiceError::InvalidInput(error.to_string()))?
+                    .path(),
+            )
             .map_err(|_| ServiceError::InvalidInput("路径不是 UTF-8".to_owned()))?;
             if !category_path.is_dir() {
                 continue;
@@ -1163,16 +1168,21 @@ impl RigDeckService {
             for skill_entry in fs::read_dir(&category_path)
                 .map_err(|error| ServiceError::InvalidInput(error.to_string()))?
             {
-                let skill_path = Utf8PathBuf::from_path_buf(skill_entry
-                    .map_err(|error| ServiceError::InvalidInput(error.to_string()))?
-                    .path())
+                let skill_path = Utf8PathBuf::from_path_buf(
+                    skill_entry
+                        .map_err(|error| ServiceError::InvalidInput(error.to_string()))?
+                        .path(),
+                )
                 .map_err(|_| ServiceError::InvalidInput("路径不是 UTF-8".to_owned()))?;
                 if !skill_path.is_dir() {
                     continue;
                 }
                 let skill_md = skill_path.join("SKILL.md");
                 if !skill_md.is_file() {
-                    skipped.push(format!("{}：无 SKILL.md", skill_path.file_name().unwrap_or("?")));
+                    skipped.push(format!(
+                        "{}：无 SKILL.md",
+                        skill_path.file_name().unwrap_or("?")
+                    ));
                     continue;
                 }
                 match self.add_local_skill(&skill_path) {
@@ -1189,10 +1199,7 @@ impl RigDeckService {
                 }
             }
         }
-        Ok(LegacyImportReport {
-            imported,
-            skipped,
-        })
+        Ok(LegacyImportReport { imported, skipped })
     }
 
     /// 导入本地 UTF-8 Prompt/Rule/Instruction 文件。
@@ -3162,7 +3169,11 @@ mod tests {
 
         let zabbix = registry.join("skills/platform/zabbix");
         fs::create_dir_all(&zabbix).unwrap();
-        fs::write(zabbix.join("SKILL.md"), b"---\nname: zabbix\n---\n# Zabbix\n").unwrap();
+        fs::write(
+            zabbix.join("SKILL.md"),
+            b"---\nname: zabbix\n---\n# Zabbix\n",
+        )
+        .unwrap();
 
         // 一个没有 SKILL.md 的目录应被跳过
         let empty = registry.join("skills/workflow/empty");
@@ -3208,10 +3219,7 @@ mod tests {
         let report = service.update_assets().await.unwrap();
         assert_eq!(report.checked, 2);
         // 内容未变，updated 仍为空但 skipped 不含取消信息。
-        assert!(!report
-            .skipped
-            .iter()
-            .any(|s| s.contains("用户取消")));
+        assert!(!report.skipped.iter().any(|s| s.contains("用户取消")));
     }
 
     #[test]

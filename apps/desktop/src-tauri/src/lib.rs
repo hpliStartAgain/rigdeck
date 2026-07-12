@@ -275,9 +275,9 @@ fn add_skill(
     // 同步 command 在独立线程执行，可安全 block_on；
     // 避免 async command 中 MutexGuard 跨 await 导致的 Send 要求。
     let service = state.service.clone();
-    tauri::async_runtime::block_on(async move {
-        service.lock().await.add_skill_source(&source).await
-    })
+    tauri::async_runtime::block_on(
+        async move { service.lock().await.add_skill_source(&source).await },
+    )
     .map_err(IpcError::from)
 }
 
@@ -401,10 +401,8 @@ async fn apply_plan(
 fn update_assets(state: tauri::State<'_, AppState>) -> Result<UpdateReport, IpcError> {
     // 同步 command 避免 MutexGuard 跨 await 的 Send 要求。
     let service = state.service.clone();
-    tauri::async_runtime::block_on(async move {
-        service.lock().await.update_assets().await
-    })
-    .map_err(IpcError::from)
+    tauri::async_runtime::block_on(async move { service.lock().await.update_assets().await })
+        .map_err(IpcError::from)
 }
 
 #[tauri::command]

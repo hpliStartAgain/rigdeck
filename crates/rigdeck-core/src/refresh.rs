@@ -209,9 +209,8 @@ pub fn classify_refresh(
                 source_updates.contains(&old_path) || source_updates.contains(new_path);
             // 仅大小写不同的路径重命名需要显式提示，避免在大小写敏感文件系统上
             // 静默丢失资产身份。
-            let case_only_rename =
-                old_path.as_str().eq_ignore_ascii_case(new_path.as_str())
-                    && old_path.as_str() != new_path.as_str();
+            let case_only_rename = old_path.as_str().eq_ignore_ascii_case(new_path.as_str())
+                && old_path.as_str() != new_path.as_str();
             let (state, conflict) = if case_only_rename {
                 (
                     DriftState::Conflict,
@@ -423,10 +422,7 @@ fn classify_issue(
         ),
         ObservationIssue::CaseOnlyRename => (
             DriftState::Conflict,
-            Some((
-                ConflictKind::CaseOnlyRename,
-                "仅大小写不同的重命名",
-            )),
+            Some((ConflictKind::CaseOnlyRename, "仅大小写不同的重命名")),
         ),
         ObservationIssue::RecreatedAfterRemoval => (
             DriftState::Conflict,
@@ -734,13 +730,7 @@ mod tests {
             logical_id: None,
             issue: None,
         };
-        let report = classify_refresh(
-            &[baseline],
-            &[observed],
-            &BTreeSet::new(),
-            0,
-            1,
-        );
+        let report = classify_refresh(&[baseline], &[observed], &BTreeSet::new(), 0, 1);
         assert_eq!(report.items.len(), 1);
         assert_eq!(report.items[0].state, DriftState::Conflict);
         assert_eq!(
@@ -766,13 +756,7 @@ mod tests {
             logical_id: None,
             issue: None,
         };
-        let report = classify_refresh(
-            &[baseline],
-            &[observed],
-            &BTreeSet::new(),
-            0,
-            1,
-        );
+        let report = classify_refresh(&[baseline], &[observed], &BTreeSet::new(), 0, 1);
         assert_eq!(report.items.len(), 1);
         assert_eq!(report.items[0].state, DriftState::ManagedModified);
         assert!(report.items[0].conflict.is_none());

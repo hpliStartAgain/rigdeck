@@ -371,10 +371,9 @@ impl AdapterManifest {
                         "deprecation.replacement 不能指向自身",
                     ));
                 }
-                if !replacement
-                    .bytes()
-                    .all(|byte| byte.is_ascii_lowercase() || byte.is_ascii_digit() || b".-_".contains(&byte))
-                {
+                if !replacement.bytes().all(|byte| {
+                    byte.is_ascii_lowercase() || byte.is_ascii_digit() || b".-_".contains(&byte)
+                }) {
                     return Err(AdapterError::new(
                         AdapterErrorCode::InvalidManifest,
                         "deprecation.replacement 只能使用小写 ASCII、数字、点、横线和下划线",
@@ -577,8 +576,7 @@ mod tests {
     #[test]
     fn manifest_without_deprecation_field_parses() {
         let mut manifest = base_manifest();
-        let mut json: serde_json::Value =
-            serde_json::to_value(&manifest).unwrap();
+        let mut json: serde_json::Value = serde_json::to_value(&manifest).unwrap();
         // 模拟旧 manifest 不含 deprecation 字段
         json.as_object_mut().unwrap().remove("deprecation");
         let parsed: AdapterManifest = serde_json::from_value(json).unwrap();

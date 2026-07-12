@@ -796,8 +796,7 @@ mod tests {
             let value: serde_json::Value = serde_json::from_str(&text)
                 .unwrap_or_else(|error| panic!("{schema_file} 不是合法 JSON: {error}"));
             assert_eq!(
-                value["$schema"],
-                "https://json-schema.org/draft/2020-12/schema",
+                value["$schema"], "https://json-schema.org/draft/2020-12/schema",
                 "{schema_file} 缺少正确的 $schema"
             );
             assert!(value["$id"].is_string(), "{schema_file} 缺少 $id");
@@ -808,7 +807,13 @@ mod tests {
     #[test]
     fn content_hash_is_deterministic_property() {
         // Property: 相同输入始终产生相同 hash
-        for input in [b"".as_slice(), b"a", b"hello", b"rigdeck", &vec![0xff; 100][..]] {
+        for input in [
+            b"".as_slice(),
+            b"a",
+            b"hello",
+            b"rigdeck",
+            &vec![0xff; 100][..],
+        ] {
             let h1 = ContentHash::from_bytes(input).to_string();
             let h2 = ContentHash::from_bytes(input).to_string();
             assert_eq!(h1, h2, "ContentHash 必须对相同输入确定性");
