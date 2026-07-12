@@ -166,7 +166,7 @@ fn validate_roots(roots: &[Utf8PathBuf]) -> AdapterResult<Vec<Utf8PathBuf>> {
                 format!("watch root 不是 UTF-8：{}", path.display()),
             )
         })?;
-        output.insert(canonical);
+        output.insert(strip_verbatim_prefix(canonical));
     }
     Ok(output.into_iter().collect())
 }
@@ -186,6 +186,7 @@ fn normalize_events(
                     format!("watch 事件路径不是 UTF-8：{}", path.display()),
                 )
             })?;
+            let path = strip_verbatim_prefix(path);
             if roots.iter().any(|root| path.starts_with(root)) {
                 paths.insert(path);
             }
@@ -214,15 +215,29 @@ fn notify_error(error: notify::Error) -> AdapterError {
     AdapterError::new(AdapterErrorCode::Io, format!("文件监听失败：{error}"))
 }
 
+/// 去掉 Windows `fs::canonicalize` 添加的 `\\?\` verbatim 前缀，
+/// 使 canonicalize 后的路径与 `notify` 事件路径保持一致。
+fn strip_verbatim_prefix(path: Utf8PathBuf) -> Utf8PathBuf {
+    let s = path.as_str();
+    if let Some(rest) = s.strip_prefix(r"\\?\") {
+        if let Some(unc) = rest.strip_prefix(r"UNC\") {
+            return Utf8PathBuf::from(format!(r"\\{unc}"));
+        }
+        return Utf8PathBuf::from(rest);
+    }
+    path
+}
+
 #[cfg(test)]
 mod tests {
     use std::{fs, thread};
 
     use super::*;
 
-    /// 构造与 `WatchService` 内部 canonicalize 后一致的 root，避免 8.3 短名差异。
+    /// 构造与 `WatchService` 内部 canonicalize+strip 后一致的 root。
     fn canonical_root(temp: &tempfile::TempDir) -> Utf8PathBuf {
-        Utf8PathBuf::from_path_buf(fs::canonicalize(temp.path()).unwrap()).unwrap()
+        let canonical = Utf8PathBuf::from_path_buf(fs::canonicalize(temp.path()).unwrap()).unwrap();
+        strip_verbatim_prefix(canonical)
     }
 
     #[test]
