@@ -1046,11 +1046,13 @@ impl RigDeckService {
             Err(rigdeck_security::SecretError::NotFound(_)) => None,
             Err(error) => return Err(error.into()),
         };
+        if previous.is_none() {
+            // secret 已不存在，视为幂等成功，不重复审计以避免 id 冲突。
+            return Ok(reference);
+        }
         self.vault.delete(&reference)?;
         if let Err(error) = self.audit_secret_change("secret_binding_deleted", &reference) {
-            if let Some(value) = previous {
-                self.vault.put(&reference, &value)?;
-            }
+            self.vault.put(&reference, &previous.unwrap())?;
             return Err(error);
         }
         Ok(reference)
