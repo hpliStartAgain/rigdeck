@@ -573,7 +573,7 @@ mod tests {
     fn archive_with_path_traversal_in_name_fails_closed() {
         // 安全夹具：tar builder 自身拒绝包含 .. 的路径，这是第一道防线。
         let mut buf: Vec<u8> = Vec::new();
-        let mut builder = tar::Builder::new(&mut buf);
+        let builder = tar::Builder::new(&mut buf);
         let mut header = tar::Header::new_gnu();
         let result = header.set_path("../escape.txt");
         assert!(result.is_err(), "tar builder 必须拒绝 .. 路径");

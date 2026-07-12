@@ -810,7 +810,7 @@ async fn run(cli: Cli) -> Result<u8, CliError> {
             if json {
                 print_json(&result)?;
             } else {
-                println!("资产 {} 已固定到当前修订", asset);
+                println!("资产 {asset} 已固定到当前修订");
             }
             EXIT_SUCCESS
         }
@@ -819,7 +819,7 @@ async fn run(cli: Cli) -> Result<u8, CliError> {
             if json {
                 print_json(&result)?;
             } else {
-                println!("资产 {} 已解除固定", asset);
+                println!("资产 {asset} 已解除固定");
             }
             EXIT_SUCCESS
         }
@@ -828,7 +828,7 @@ async fn run(cli: Cli) -> Result<u8, CliError> {
             if json {
                 print_json(&result)?;
             } else {
-                println!("资产 {} 已归档", asset);
+                println!("资产 {asset} 已归档");
             }
             EXIT_SUCCESS
         }
@@ -837,7 +837,7 @@ async fn run(cli: Cli) -> Result<u8, CliError> {
             if json {
                 print_json(&result)?;
             } else {
-                println!("资产 {} 已从归档恢复", asset);
+                println!("资产 {asset} 已从归档恢复");
             }
             EXIT_SUCCESS
         }

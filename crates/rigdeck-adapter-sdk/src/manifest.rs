@@ -575,7 +575,7 @@ mod tests {
 
     #[test]
     fn manifest_without_deprecation_field_parses() {
-        let mut manifest = base_manifest();
+        let manifest = base_manifest();
         let mut json: serde_json::Value = serde_json::to_value(&manifest).unwrap();
         // 模拟旧 manifest 不含 deprecation 字段
         json.as_object_mut().unwrap().remove("deprecation");
