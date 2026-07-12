@@ -220,13 +220,19 @@ mod tests {
 
     use super::*;
 
+    /// 构造与 `WatchService` 内部 canonicalize 后一致的 root，避免 8.3 短名差异。
+    fn canonical_root(temp: &tempfile::TempDir) -> Utf8PathBuf {
+        Utf8PathBuf::from_path_buf(fs::canonicalize(temp.path()).unwrap()).unwrap()
+    }
+
     #[test]
     fn watcher_reports_local_change_within_budget() {
         let temp = tempfile::tempdir().unwrap();
         let root = Utf8PathBuf::from_path_buf(temp.path().to_owned()).unwrap();
         let watcher =
             WatchService::start(std::slice::from_ref(&root), Duration::from_millis(100)).unwrap();
-        let target = root.join("AGENTS.md");
+        let canonical = canonical_root(&temp);
+        let target = canonical.join("AGENTS.md");
         fs::write(&target, b"value").unwrap();
         let batch = watcher
             .next_batch(Duration::from_secs(2))
@@ -241,7 +247,8 @@ mod tests {
         let root = Utf8PathBuf::from_path_buf(temp.path().to_owned()).unwrap();
         let watcher =
             WatchService::start(std::slice::from_ref(&root), Duration::from_millis(150)).unwrap();
-        let target = root.join("value.txt");
+        let canonical = canonical_root(&temp);
+        let target = canonical.join("value.txt");
         fs::write(&target, b"one").unwrap();
         thread::sleep(Duration::from_millis(20));
         fs::write(&target, b"two").unwrap();

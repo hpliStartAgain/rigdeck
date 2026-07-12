@@ -110,7 +110,7 @@ impl RigDeckService {
             }
             manifests.push(manifest);
         }
-        manifests.sort_by(|left, right| right.created_at_ms.cmp(&left.created_at_ms));
+        manifests.sort_by_key(|right| std::cmp::Reverse(right.created_at_ms));
         Ok(manifests)
     }
 

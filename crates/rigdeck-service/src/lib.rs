@@ -1073,6 +1073,11 @@ impl RigDeckService {
         project_root: Option<Utf8PathBuf>,
     ) -> ServiceResult<StartupRefreshOutcome> {
         let baselines = self.baselines_by_instance()?;
+        let home = canonicalize_home(home)?;
+        let project_root = match project_root {
+            Some(path) => Some(canonicalize_home(path)?),
+            None => None,
+        };
         let context = DetectionContext { home, project_root };
         let outcome = self.refresher.run(&context, &baselines, &BTreeMap::new());
         for result in &outcome.instances {
@@ -2342,6 +2347,21 @@ fn now_ms() -> i64 {
         .unwrap_or_default()
         .as_millis();
     i64::try_from(millis).unwrap_or(i64::MAX)
+}
+
+/// 将 home/project_root 规范化为操作系统真实路径，消除 8.3 短名差异，
+/// 确保 adapter 扫描（canonicalize 已存在文件）与 render_bundle
+/// （基于 context.home 拼接）产生一致的路径字符串。
+fn canonicalize_home(path: Utf8PathBuf) -> ServiceResult<Utf8PathBuf> {
+    match std::fs::canonicalize(path.as_std_path()) {
+        Ok(canonical) => Utf8PathBuf::from_path_buf(canonical).map_err(|path| {
+            ServiceError::InvalidInput(format!("home 路径不是 UTF-8：{}", path.display()))
+        }),
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(path),
+        Err(error) => Err(ServiceError::InvalidInput(format!(
+            "无法规范化 home 路径 {path}：{error}"
+        ))),
+    }
 }
 
 #[cfg(test)]
