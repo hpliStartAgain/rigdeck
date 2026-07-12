@@ -16,7 +16,7 @@ use rigdeck_core::{
 
 use crate::{
     classify_managed_document, contains_managed_marker, encode_mcp_entry, inspect_managed_block,
-    validate_managed_document, ManagedBlockIssue, ManagedBlockState,
+    ManagedBlockIssue, ManagedBlockState,
 };
 
 /// 按 adapter_id 查 CLI 版本命令，执行后提取版本号。
@@ -62,10 +62,9 @@ fn detect_cli_version(adapter_id: &str) -> Option<String> {
 
 /// 从命令输出中提取第一个 x.y.z 格式的版本号。
 fn extract_version_number(text: &str) -> Option<String> {
-    let mut chars = text.chars().peekable();
     let mut current = String::new();
     let mut found_digit = false;
-    while let Some(ch) = chars.next() {
+    for ch in text.chars() {
         if ch.is_ascii_digit() {
             found_digit = true;
             current.push(ch);
